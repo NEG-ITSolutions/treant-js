@@ -792,7 +792,8 @@
 
                 // if the tree is smaller than the draw area, then center the tree within drawing area
                 node.X += negOffsetX + ((treeWidth < this.drawArea.clientWidth) ? deltaX : this.CONFIG.padding);
-                node.Y += negOffsetY + ((treeHeight < this.drawArea.clientHeight) ? deltaY : this.CONFIG.padding);
+                // draw the tree from the top of the container instead of the middle
+                node.Y += negOffsetY + this.CONFIG.padding;
 
                 var collapsedParent = node.collapsedParent(),
                     hidePoint = null;
@@ -876,7 +877,7 @@
             } // else this.CONFIG.scrollbar == 'None'
 
             return this;
-        },        
+        },
         /**
          * @param {TreeNode} treeNode
          * @param {boolean} hidePoint
@@ -1854,9 +1855,9 @@
                 if (key.startsWith("data-")) {
                     node.setAttribute(key, this.text[key]);
                 } else {
-                    
-                    var textElement = document.createElement(this.text[key].href ? 'a' : 'p');
-                    
+                    // use div instead of p
+                    var textElement = document.createElement(this.text[key].href ? 'a' : 'div');
+
                     // make an <a> element if required
                     if (this.text[key].href) {
                         textElement.href = this.text[key].href;
@@ -1864,14 +1865,14 @@
                             textElement.target = this.text[key].target;
                         }
                     }
-                    
+
                     textElement.className =  "node-"+key;
                     textElement.appendChild(document.createTextNode(
                         this.text[key].val ? this.text[key].val :
                         this.text[key] instanceof Object ? "'val' param missing!" : this.text[key]
                     )
                     );
-                    
+
                     node.appendChild(textElement);
                 }
             }
