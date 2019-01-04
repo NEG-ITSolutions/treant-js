@@ -422,8 +422,10 @@
 
             UTIL.addClass( this.drawArea, 'Treant' );
 
-            // kill of any child elements that may be there
-            this.drawArea.innerHTML = '';
+            if (this.CONFIG.clearDrawArea) {
+                // kill of any child elements that may be there
+                this.drawArea.innerHTML = '';
+            }
 
             this.imageLoader = new ImageLoader();
 
@@ -2006,6 +2008,8 @@
         levelSeparation: 30,
         siblingSeparation: 30,
         subTeeSeparation: 30,
+
+        clearDrawArea: false,
 
         hideRootNode: false,
 
