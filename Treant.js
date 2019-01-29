@@ -1856,6 +1856,12 @@
                 // adding DATA Attributes to the node
                 if (key.startsWith("data-")) {
                     node.setAttribute(key, this.text[key]);
+                } else if (key.startsWith("html-")) {
+                    var htmlElement = document.createElement('div');
+
+                    htmlElement.innerHTML = this.text[key].val;
+
+                    node.appendChild(htmlElement);
                 } else {
                     // use div instead of p
                     var textElement = document.createElement(this.text[key].href ? 'a' : 'div');
