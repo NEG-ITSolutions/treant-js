@@ -1859,7 +1859,7 @@
                 } else if (key.startsWith("html-")) {
                     var htmlElement = document.createElement('div');
 
-                    htmlElement.innerHTML = this.text[key].val;
+                    htmlElement.innerHTML = this.text[key];
 
                     node.appendChild(htmlElement);
                 } else {
