@@ -764,9 +764,10 @@
                     y: treeSize.y.max - treeHeight/2
                 };
 
+            this.drawArea.style['width'] = treeWidth + (this.CONFIG.padding * 2) + 'px';
+
             this.handleOverflow(treeWidth, treeHeight);
 
-            this.drawArea.style['width'] = treeWidth + (this.CONFIG.padding * 2) + 'px';
 
             var
                 containerCenter = {
