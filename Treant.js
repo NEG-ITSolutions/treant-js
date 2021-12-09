@@ -1857,8 +1857,22 @@
         // TEXT
         if (this.text) {
             for (var key in this.text) {
-                // adding DATA Attributes to the node
-                if (key.startsWith("data-")) {
+                if (this.text[key] === Object(this.text[key]) && !(this.text[key] instanceof Array)) {
+                    // add divs with html and classes as objects
+                    var element = document.createElement('div');
+                    element.className = this.text[key]['className'] + ' node-' + key;
+
+                    if (this.text[key]['text']) {
+                        element.appendChild(document.createTextNode(this.text[key]['text']));
+                    }
+
+                    if (this.text[key]['html']) {
+                        element.innerHTML = this.text[key]['html'];
+                    }
+
+                    node.appendChild(element);
+                } else if (key.startsWith("data-")) {
+                    // adding DATA Attributes to the node
                     node.setAttribute(key, this.text[key]);
                 } else if (key.startsWith("html-")) {
                     var htmlElement = document.createElement('div');
