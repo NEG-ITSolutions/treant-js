@@ -1351,6 +1351,9 @@
             this.collapsed = nodeStructure.collapsed;
 
             this.text = nodeStructure.text;
+            this.assigned_activity_id = nodeStructure.assigned_activity_id;
+            this.activities = nodeStructure.activities;
+            this.title = nodeStructure.title;
 
             // '.node' DIV
             this.nodeInnerHTML = nodeStructure.innerHTML;
@@ -1854,23 +1857,19 @@
             node.appendChild(image);
         }
 
+        // ACTIVITIES
+        if (this.activities instanceof Array) {
+            this.activities.forEach(activity => node.insertAdjacentHTML(
+                'beforeend',
+                this.buildNodeFromActivity(activity))
+            );
+        }
+
         // TEXT
         if (this.text) {
             for (var key in this.text) {
                 if (this.text[key] === Object(this.text[key]) && !(this.text[key] instanceof Array)) {
-                    // add divs with html and classes as objects
-                    var element = document.createElement('div');
-                    element.className = this.text[key]['className'] + ' node-' + key;
-
-                    if (this.text[key]['text']) {
-                        element.appendChild(document.createTextNode(this.text[key]['text']));
-                    }
-
-                    if (this.text[key]['html']) {
-                        element.innerHTML = this.text[key]['html'];
-                    }
-
-                    node.appendChild(element);
+                    node.appendChild(this.buildNodeFromObject(this.text[key], key));
                 } else if (key.startsWith("data-")) {
                     // adding DATA Attributes to the node
                     node.setAttribute(key, this.text[key]);
@@ -1903,7 +1902,64 @@
                 }
             }
         }
+
+        var portlet_head_title = node.querySelector('.m-portlet__head-title');
+        var head_icon = document.querySelector('[type="text/template"][data-template="head_icon"]').innerText;
+
+        if (portlet_head_title === null) {
+            return node;
+        }
+
+        if (node.dataset.icon) {
+            portlet_head_title.innerHTML = head_icon.replaceAll('%class%', node.dataset.icon) + portlet_head_title.innerHTML;
+        }
+
         return node;
+    };
+
+    /**
+     * @param {Object} text_data
+     * @param {string} key
+     * 
+     * @returns {element} to add to node
+     */
+    TreeNode.prototype.buildNodeFromObject = function (text_data, key) {
+        // add divs with html and classes as objects
+        var element = document.createElement('div');
+        element.className = text_data['className'] + ' node-' + key;
+
+        if (text_data['text']) {
+            element.appendChild(document.createTextNode(text_data['text']));
+
+            return element;
+        }
+
+        if (text_data['html']) {
+            element.innerHTML = text_data['html'];
+
+            return element;
+        }
+
+        return element;
+    };
+
+    /**
+     * @param {object} activity
+     * 
+     * @returns {element} to add to node
+     */
+    TreeNode.prototype.buildNodeFromActivity = function (activity) {
+        var template = document.querySelector('[type="text/template"][data-template="activity_template"]').innerText;
+
+        Object.keys(activity)
+            .filter(key => activity[key])
+            .forEach((key) => {
+                template = template.replaceAll('%' + key + '%', activity[key] || '');
+            });
+
+        template = template.replaceAll('%block_id%', this.nodeHTMLid);
+
+        return template;
     };
 
     /**
@@ -1948,6 +2004,12 @@
 
             /////////// CREATE NODE //////////////
             node = document.createElement(this.link.href ? 'a' : 'div');
+
+        if (document.querySelector('[type="text/template"][data-template="tree_node"]')) {
+            node.innerHTML = document.querySelector('[type="text/template"][data-template="tree_node"]').innerText.replaceAll('%title%', this.title || '');
+
+            node = node.children[0];
+        }
 
         node.className = (!this.pseudo) ? TreeNode.CONFIG.nodeHTMLclass : 'pseudo';
         if (this.nodeHTMLclass && !this.pseudo) {
