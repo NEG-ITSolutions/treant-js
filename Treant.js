@@ -1353,7 +1353,7 @@
             this.text = nodeStructure.text;
             this.assigned_activity_id = nodeStructure.assigned_activity_id;
             this.activities = nodeStructure.activities;
-            this.activity_properties = nodeStructure.activity_properties;
+            this.properties = nodeStructure.properties;
             this.title = nodeStructure.title;
 
             // '.node' DIV
@@ -1866,10 +1866,10 @@
             );
         }
 
-        if (this.activity_properties instanceof Object) {
+        if (this.properties instanceof Object) {
             node.insertAdjacentHTML(
                 'beforeend',
-                this.buildNodeFromActivity(this.activity_properties)
+                this.buildNodeFromActivity(this.properties)
             );
         }
 
