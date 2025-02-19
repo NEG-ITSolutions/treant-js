@@ -247,7 +247,7 @@
                 element.style.height = height + 'px';
             }
         },
-        isjQueryAvailable: function () { return (typeof ($) !== 'undefined' && $); },
+        isjQueryAvailable: function() {return(typeof ($) !== 'undefined' && $);}
     };
 
     /**
@@ -467,10 +467,8 @@
          * @param {object} nodeDefinition
          * @returns {TreeNode}
          */
-        addNode: function (parentTreeNode, nodeDefinition) {
-            var dbEntry = this.nodeDB.get(parentTreeNode.id);
-
-            this.CONFIG.callback.onBeforeAddNode.apply(this, [parentTreeNode, nodeDefinition]);
+        addNode: function( parentTreeNode, nodeDefinition ) {
+            this.CONFIG.callback.onBeforeAddNode.apply( this, [parentTreeNode, nodeDefinition] );
 
             var oNewNode = this.nodeDB.createNode(nodeDefinition, parentTreeNode.id, this);
             oNewNode.createGeometry(this);
@@ -499,9 +497,8 @@
         positionTree: function (callback) {
             var self = this;
 
-            if (this.imageLoader.isNotLoading()) {
-                var root = this.root(),
-                    orient = this.CONFIG.rootOrientation;
+            if ( this.imageLoader.isNotLoading() ) {
+                var root = this.root();                    
 
                 this.resetLevelData();
 
@@ -629,7 +626,7 @@
                 }
 
                 // find the gap between two trees and apply it to subTrees
-                // and mathing smaller gaps to smaller subtrees
+                // and matching smaller gaps to smaller subtrees
 
                 var totalGap = (firstChildLeftNeighbor.prelim + modifierSumLeft + firstChildLeftNeighbor.size() + this.CONFIG.subTeeSeparation) - (firstChild.prelim + modifierSumRight);
 
@@ -677,71 +674,73 @@
          * the tree.  (The roles of x and y are reversed for
          * RootOrientations of EAST or WEST.)
          */
-        secondWalk: function (node, level, X, Y) {
-            if (level <= this.CONFIG.maxDepth) {
-                var xTmp = node.prelim + X,
-                    yTmp = Y, align = this.CONFIG.nodeAlign,
-                    orient = this.CONFIG.rootOrientation,
-                    levelHeight, nodesizeTmp;
+        secondWalk: function( node, level, X, Y ) {
+            if ( level > this.CONFIG.maxDepth ) {
+                return;
+            }
 
-                if (orient === 'NORTH' || orient === 'SOUTH') {
-                    levelHeight = this.levelMaxDim[level].height;
-                    nodesizeTmp = node.height;
-                    if (node.pseudo) {
-                        node.height = levelHeight;
-                    } // assign a new size to pseudo nodes
+            var xTmp = node.prelim + X,
+                yTmp = Y, align = this.CONFIG.nodeAlign,
+                orient = this.CONFIG.rootOrientation,
+                levelHeight, nodesizeTmp;
+
+            if (orient === 'NORTH' || orient === 'SOUTH') {
+                levelHeight = this.levelMaxDim[level].height;
+                nodesizeTmp = node.height;
+                if (node.pseudo) {
+                    node.height = levelHeight;
+                } // assign a new size to pseudo nodes
+            }
+            else if (orient === 'WEST' || orient === 'EAST') {
+                levelHeight = this.levelMaxDim[level].width;
+                nodesizeTmp = node.width;
+                if (node.pseudo) {
+                    node.width = levelHeight;
+                } // assign a new size to pseudo nodes
+            }
+
+            node.X = xTmp;
+
+            if (node.pseudo) { // pseudo nodes need to be properly aligned, otherwise position is not correct in some examples
+                if (orient === 'NORTH' || orient === 'WEST') {
+                    node.Y = yTmp; // align "BOTTOM"
                 }
-                else if (orient === 'WEST' || orient === 'EAST') {
-                    levelHeight = this.levelMaxDim[level].width;
-                    nodesizeTmp = node.width;
-                    if (node.pseudo) {
-                        node.width = levelHeight;
-                    } // assign a new size to pseudo nodes
-                }
-
-                node.X = xTmp;
-
-                if (node.pseudo) { // pseudo nodes need to be properly aligned, otherwise position is not correct in some examples
-                    if (orient === 'NORTH' || orient === 'WEST') {
-                        node.Y = yTmp; // align "BOTTOM"
-                    }
-                    else if (orient === 'SOUTH' || orient === 'EAST') {
-                        node.Y = (yTmp + (levelHeight - nodesizeTmp)); // align "TOP"
-                    }
-
-                } else {
-                    node.Y = (align === 'CENTER') ? (yTmp + (levelHeight - nodesizeTmp) / 2) :
-                        (align === 'TOP') ? (yTmp + (levelHeight - nodesizeTmp)) :
-                            yTmp;
+                else if (orient === 'SOUTH' || orient === 'EAST') {
+                    node.Y = (yTmp + (levelHeight - nodesizeTmp)); // align "TOP"
                 }
 
-                if (orient === 'WEST' || orient === 'EAST') {
-                    var swapTmp = node.X;
-                    node.X = node.Y;
-                    node.Y = swapTmp;
-                }
+            } else {
+                node.Y = ( align === 'CENTER' ) ? (yTmp + (levelHeight - nodesizeTmp) / 2) :
+                    ( align === 'TOP' )  ? (yTmp + (levelHeight - nodesizeTmp)) :
+                        yTmp;
+            }
 
-                if (orient === 'SOUTH') {
-                    node.Y = -node.Y - nodesizeTmp;
-                }
-                else if (orient === 'EAST') {
-                    node.X = -node.X - nodesizeTmp;
-                }
+            if ( orient === 'WEST' || orient === 'EAST' ) {
+                var swapTmp = node.X;
+                node.X = node.Y;
+                node.Y = swapTmp;
+            }
 
-                if (node.childrenCount() !== 0) {
-                    if (node.id === 0 && this.CONFIG.hideRootNode) {
-                        // ako je root node Hiden onda nemoj njegovu dijecu pomaknut po Y osi za Level separation, neka ona budu na vrhu
-                        this.secondWalk(node.firstChild(), level + 1, X + node.modifier, Y);
-                    }
-                    else {
-                        this.secondWalk(node.firstChild(), level + 1, X + node.modifier, Y + levelHeight + this.CONFIG.levelSeparation);
-                    }
-                }
+            if (orient === 'SOUTH' ) {
+                node.Y = -node.Y - nodesizeTmp;
+            }
+            else if ( orient === 'EAST' ) {
+                node.X = -node.X - nodesizeTmp;
+            }
 
-                if (node.rightSibling()) {
-                    this.secondWalk(node.rightSibling(), level, X, Y);
+            if ( node.childrenCount() !== 0 ) {
+                if ( node.id === 0 && this.CONFIG.hideRootNode ) {
+                    // ako je root node Hiden onda nemoj njegovu dijecu pomaknut po Y osi za Level separation, neka ona budu na vrhu
+                    this.secondWalk(node.firstChild(), level + 1, X + node.modifier, Y);
+                }
+                else {
+                    this.secondWalk(node.firstChild(), level + 1, X + node.modifier, Y + levelHeight + this.CONFIG.levelSeparation);
                 }
             }
+
+            if ( node.rightSibling() ) {
+                this.secondWalk( node.rightSibling(), level, X, Y );
+            }            
         },
 
         /**
@@ -1289,15 +1288,15 @@
          * @param {object} nodeStructure
          * @returns {boolean}
          */
-        hasGrandChildren: function (nodeStructure) {
-            var i = nodeStructure.children.length;
-            while (i--) {
-                if (nodeStructure.children[i].children) {
-                    return true;
-                }
-            }
-            return false;
-        }
+	hasGrandChildren: function (nodeStructure) {
+	    var i = nodeStructure.children.length;
+	    while (i--) {
+	        if (nodeStructure.children[i].children && nodeStructure.children[i].children.length > 0) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
     };
 
     /**
@@ -1769,8 +1768,7 @@
             return this;
         },
 
-        show: function () {
-            var bCurrentState = this.hidden;
+        show: function() {            
             this.hidden = false;
 
             this.nodeDOM.style.visibility = 'visible';
@@ -2043,8 +2041,8 @@
         }
 
         /////////// BUILD NODE CONTENT //////////////
-        if (!this.pseudo) {
-            node = this.nodeInnerHTML ? this.buildNodeFromHtml(node) : this.buildNodeFromText(node)
+        if ( !this.pseudo ) {
+            node = this.nodeInnerHTML? this.buildNodeFromHtml(node) : this.buildNodeFromText(node);
 
             // handle collapse switch
             if (this.collapsed || (this.collapsable && this.childrenCount() && !this.stackParentId)) {
