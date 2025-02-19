@@ -1960,7 +1960,13 @@
         Object.keys(activity)
             .filter(key => activity[key])
             .forEach((key) => {
-                template = template.replaceAll('%' + key + '%', activity[key] || '');
+                var p = document.createElement('p');
+
+                p.appendChild(document.createTextNode(activity[key] || ''));
+
+                var text = p.innerHTML;            
+
+                template = template.replaceAll('%' + key + '%', text);
             });
 
         template = template.replaceAll('%block_id%', this.nodeHTMLid);
